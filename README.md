@@ -1,5 +1,9 @@
 # 🚀 Two-Tier Application (Flask + MySQL) – Docker Practice Project
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Docker](https://img.shields.io/badge/Docker-Automated-2496ED?logo=docker)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-Jenkins-D24939?logo=jenkins)
+
 A hands-on two-tier web application built with Flask (backend) and MySQL (database). This repository is designed purely for learning and practising Docker & DevOps concepts step by step — from basic Dockerfiles to Docker Compose and CI/CD.
 
 > 🎯 **Goal:** Learn Docker by *building everything yourself* instead of just running ready-made configs.
