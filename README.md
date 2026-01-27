@@ -224,6 +224,11 @@ sudo usermod -aG docker $USER
 ✅ Explains **how Docker actually works**
 ✅ Demonstrates real DevOps fundamentals
 
+** Final app deployement will look like :- 
+
+<img width="1140" height="1102" alt="image" src="https://github.com/user-attachments/assets/f371ca61-88e8-4e6e-904a-126763b16c5f" />
+
+
 > Interviewers value **understanding**, not just running commands.
 
 ---
