@@ -23,7 +23,7 @@ services:
 
   flask-app:
     image: heyyprakhar1/flask-image:latest
-    container_name: two-tier-app-flask-app
+    container_name: two-tier-flask-app
     ports:
       - "5000:5000"
     environment:
