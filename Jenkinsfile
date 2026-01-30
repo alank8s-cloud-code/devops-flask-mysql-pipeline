@@ -43,8 +43,8 @@ pipeline {
     post {
         success {
             emailext(
-                from: 'exmaple@gmail.com',
-                to: 'exmaple@gmail.com',
+                from: 'heyyprakhar0106@gmail.com',
+                to: 'heyyprakhar0106@gmail.com',
                 subject: 'build success',
                 body: 'build success'
             )
@@ -52,8 +52,8 @@ pipeline {
 
         failure {
             emailext(
-                from: 'exmaple@gmail.com',
-                to: 'example@gmail.com',
+                from: 'heyyprakhar0106@gmail.com',
+                to: 'heyyprakhar0106@gmail.com',
                 subject: 'build failed',
                 body: 'build failed'
             )
