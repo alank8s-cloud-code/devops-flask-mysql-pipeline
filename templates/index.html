@@ -335,11 +335,11 @@
                                 </div>
                                 <div class="todo-actions">
                                     <button 
-                                        onclick="toggleRename({{ todo.id }})" 
+                                        onclick="togglerename({{ todo.id }})" 
                                         class="btn btn-warning btn-small"
                                         type="button"
                                     >
-                                        ✏ Rename
+                                        ✏ Update
                                     </button>
                                     {% if todo.status == 'pending' %}
                                         <a href="/complete/{{ todo.id }}" class="btn btn-success btn-small">
