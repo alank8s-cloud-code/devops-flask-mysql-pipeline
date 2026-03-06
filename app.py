@@ -113,6 +113,32 @@ def complete_todo(todo_id):
     
     return redirect(url_for('index'))
 
+@app.route('/rename/<int:todo_id>', methods=['POST'])
+def rename_todo(todo_id):
+    """Rename an existing todo task"""
+    new_task = request.form.get('new_task', '').strip()
+
+    if not new_task:
+        flash('Task name cannot be empty!', 'error')
+        return redirect(url_for('index'))
+
+    connection = get_db_connection()
+    if connection:
+        try:
+            cursor = connection.cursor()
+            cursor.execute("UPDATE todos SET task = %s WHERE id = %s", (new_task, todo_id))
+            connection.commit()
+            flash('Task renamed successfully!', 'success')
+        except Error as e:
+            flash(f'Error renaming todo: {str(e)}', 'error')
+        finally:
+            cursor.close()
+            connection.close()
+    else:
+        flash('Database connection failed', 'error')
+
+    return redirect(url_for('index'))
+
 @app.route('/delete/<int:todo_id>')
 def delete_todo(todo_id):
     """Delete a todo"""

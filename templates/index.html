@@ -235,6 +235,33 @@
             margin-bottom: 20px;
             opacity: 0.3;
         }
+
+        .rename-form {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .rename-form.active {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rename-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .btn-warning {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e8690b;
+        }
     </style>
 </head>
 <body>
@@ -279,6 +306,26 @@
                             <li class="todo-item {% if todo.status == 'completed' %}completed{% endif %}">
                                 <div class="todo-content">
                                     <div class="todo-task">{{ todo.task }}</div>
+                                    <form 
+                                        method="POST" 
+                                        action="/rename/{{ todo.id }}" 
+                                        class="rename-form" 
+                                        id="rename-form-{{ todo.id }}"
+                                    >
+                                        <input 
+                                            type="text" 
+                                            name="new_task" 
+                                            value="{{ todo.task }}"
+                                            placeholder="Enter new task name"
+                                            required
+                                        >
+                                        <button type="submit" class="btn btn-primary btn-small">Save</button>
+                                        <button 
+                                            type="button" 
+                                            onclick="toggleRename({{ todo.id }})" 
+                                            class="btn btn-danger btn-small"
+                                        >Cancel</button>
+                                    </form>
                                     <div class="todo-meta">
                                         {{ todo.created_at.strftime('%B %d, %Y at %I:%M %p') }}
                                         <span class="todo-status status-{{ todo.status }}">
@@ -287,6 +334,13 @@
                                     </div>
                                 </div>
                                 <div class="todo-actions">
+                                    <button 
+                                        onclick="toggleRename({{ todo.id }})" 
+                                        class="btn btn-warning btn-small"
+                                        type="button"
+                                    >
+                                        ✏ Rename
+                                    </button>
                                     {% if todo.status == 'pending' %}
                                         <a href="/complete/{{ todo.id }}" class="btn btn-success btn-small">
                                             ✓ Complete
@@ -313,6 +367,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleRename(id) {
+            const form = document.getElementById('rename-form-' + id);
+            form.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>
-
