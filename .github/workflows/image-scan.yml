@@ -1,6 +1,9 @@
 name: image scanning
 on:
     workflow_call:
+        secrets:
+            DOCKER_PASSWORD:
+                required: true
 jobs:
     image-scan:
         runs-on: ubuntu-latest
