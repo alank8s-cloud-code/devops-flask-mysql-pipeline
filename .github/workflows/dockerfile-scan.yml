@@ -1,0 +1,15 @@
+#scan the dockerfile for any vulnerabilities (CVEs)
+name: dockerfile scan
+on:
+    workflow_call:
+jobs:
+    dockerfile-scan:
+        runs-on: self-hosted
+        steps:
+            - name: code checkout
+              uses: actions/checkout@v4
+
+            - name: scan dockerfile
+              uses: hadolint/hadolint-actions@v3
+              with:
+                  dockerfile: dockerfile
