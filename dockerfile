@@ -12,7 +12,7 @@ COPY . .
 
 # INSTALLING THE PACKAGES & DEPENDENCIES
 
-RUN pip install -r requirements.txt
+RUN pip install -r --no-cache-dir requirements.txt
 
 # EXPOSE
 
