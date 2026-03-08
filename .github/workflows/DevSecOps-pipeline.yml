@@ -1,0 +1,32 @@
+name: DevSecOps end-to-end workflow
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+jobs:
+    code-quality:
+        uses: ./.github/workflows/code-quality.yml
+
+    dependency-check:
+        uses: ./.github/workflows/dependency-check.yml
+
+    image-scan:
+        uses: ./.github/workflows/image-vulnerability-scan.yml
+
+    dockerfile-scan:
+        uses: ./.github/workflows/dockerfile-scan.yml
+
+    secret-scan:
+        uses: ./.github/workflows/secret-scan.yml
+
+    deploy-to-prod-server:
+        needs:
+            [
+                code-quality,
+                dependency-check,
+                dockerfile-scan,
+                secret-scan,
+                image-scan,
+            ]
+        uses: ./.github/workflows/deploy-to-prod-server.yml
