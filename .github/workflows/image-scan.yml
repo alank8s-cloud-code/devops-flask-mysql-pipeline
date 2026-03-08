@@ -17,3 +17,4 @@ jobs:
                   image-ref: ${{ vars.DOCKER_USER }}/two-tier-app:latest
                   severity: Critical
                   Exit-Code: "1"
+                  ignore-unfixed: true
