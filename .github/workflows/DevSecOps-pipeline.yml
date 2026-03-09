@@ -31,6 +31,6 @@ jobs:
         secrets: inherit
 
     deploy-to-prod-server:
-        needs: [image-scan, docker-build-push]
+        needs: [image-scan]
         uses: ./.github/workflows/deploy-to-prod-server.yml
         secrets: inherit

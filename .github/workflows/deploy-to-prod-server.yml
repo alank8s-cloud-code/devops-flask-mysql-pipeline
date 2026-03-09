@@ -22,4 +22,3 @@ jobs:
                   script: |
                       echo "Tests are done and we are deploying to prod server"
                       mkdir -p /home/ubuntu/DevOps
-                  secrets: inherit
