@@ -17,8 +17,7 @@ jobs:
             - name: scan image
               uses: aquasecurity/trivy-action@0.35.0
               with:
-                  image-ref: ${{ vars.DOCKER_USER }}//flask-image:latest
+                  image-ref: ${{ vars.DOCKER_USER }}/flask-image:latest
                   severity: CRITICAL
                   exit-code: "1"
                   ignore-unfixed: true
-                  trivy-version: --pull always

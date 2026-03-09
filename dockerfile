@@ -1,25 +1,20 @@
-# BASE-IMAGE
-
+# BASE IMAGE
 FROM python:3.11-slim
 
-# CREATE A WORKING DIRECTORY
-
-WORKDIR /app
-
-# COPY THE CODE FROM REMOTE TO LOCAL
-
-COPY . . 
-
+# UPGRADE SYSTEM PACKAGES (fixes OpenSSL CVE)
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
-# INSTALLING THE PACKAGES & DEPENDENCIES
+# CREATE WORKING DIRECTORY
+WORKDIR /app
 
-RUN pip install -r --no-cache-dir requirements.txt
+# COPY THE CODE
+COPY . .
 
-# EXPOSE
+# INSTALL PYTHON DEPENDENCIES
+RUN pip install --no-cache-dir -r requirements.txt
 
+# EXPOSE PORT
 EXPOSE 5000
 
 # SERVE THE APPLICATION
-
-CMD ["python","app.py"]
+CMD ["python", "app.py"]
