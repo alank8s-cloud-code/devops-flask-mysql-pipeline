@@ -1,6 +1,13 @@
 name: deploy-to-server
 on:
     workflow_call:
+        secrets:
+            EC2_PROD_SERVER_HOST:
+                required: true
+            EC2_PROD_SERVER_SSH_USER:
+                required: true
+            EC2_PROD_SERVER_SSH_KEY:
+                required: true
 
 jobs:
     deploy-to-prod-server:
@@ -9,9 +16,9 @@ jobs:
             - name: Deploy to prod server
               uses: appleboy/ssh-action@v1.0.3
               with:
-                  host: ${{ secrets.EC2.PROD_SERVER_HOST }}
-                  key: ${{ secrets.EC2.PROD_SERVER_SSH_KEY }}
-                  username: ${{ secrets.EC2.PROD_SERVER_SSH_USER }}
+                  host: ${{ secrets.EC2_PROD_SERVER_HOST }}
+                  key: ${{ secrets.EC2_PROD_SERVER_SSH_KEY }}
+                  username: ${{ secrets.EC2_PROD_SERVER_SSH_USER }}
                   script: |
                       echo "Tests are done and we are deploying to prod server"
-                      mkdir -p devops
+                      mkdir -p /home/ubuntu/DevOps
