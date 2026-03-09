@@ -1,7 +1,7 @@
 name: DevSecOps end-to-end workflow
 on:
     push:
-        branches: [main]
+    workflow_dispatch:
 jobs:
     code-quality-scan:
         uses: ./.github/workflows/code-quality.yml
