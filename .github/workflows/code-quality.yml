@@ -4,7 +4,7 @@ on:
   workflow_call:
 jobs:
   code-quality:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
