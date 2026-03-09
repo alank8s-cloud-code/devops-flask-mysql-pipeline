@@ -10,6 +10,8 @@ WORKDIR /app
 
 COPY . . 
 
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 # INSTALLING THE PACKAGES & DEPENDENCIES
 
 RUN pip install -r --no-cache-dir requirements.txt
