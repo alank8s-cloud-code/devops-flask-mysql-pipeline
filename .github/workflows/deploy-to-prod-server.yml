@@ -42,8 +42,8 @@ jobs:
                   key: ${{ secrets.PROD_SERVER_SSH_KEY }}
                   username: ${{ secrets.PROD_SERVER_SSH_USER }}
                   script: |
-                      echo "Running app"
-                      sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
-                      sudo usermod -aG docker $USER && newgrp docker
-                      image: ${{vars.DOCKER_USER }}/flask-image:latest
-                      cd ~/Two-tier-folder && docker compose down && docker compose up -d --build --force-recreate --pull always
+                      echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ vars.DOCKER_USER }}" --password-stdin
+                      cd ~/Two-tier-folder
+                      export DOCKER_USER="${{ vars.DOCKER_USER }}"
+                      sudo -E docker compose down
+                      sudo -E docker compose up -d --pull always --force-recreate
