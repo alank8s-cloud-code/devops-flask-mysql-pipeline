@@ -45,6 +45,8 @@ jobs:
                       echo "Running app"
                       sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
                       sudo usermod -aG docker $USER && newgrp docker
-                      export tags: ${{ vars.DOCKER_USER }}/flask-image:latest
+                      export
+                        tags: |
+                           ${{ vars.DOCKER_USER }}/flask-image:latest
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USER }} --password-stdin
                       cd ~/DevOps && docker compose down && docker compose up -d --build --force-recreate --pull always
