@@ -15,12 +15,12 @@ jobs:
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: pull fresh image
-              run: docker pull ${{ vars.DOCKER_USER }}/flask-image:latest
+              run: docker pull ${{ vars.DOCKER_USER }}/flask-image
 
             - name: scan image
               uses: aquasecurity/trivy-action@0.35.0
               with:
-                  image-ref: ${{ vars.DOCKER_USER }}/flask-image:latest
+                  image-ref: ${{ vars.DOCKER_USER }}/flask-image
                   severity: CRITICAL,HIGH
                   exit-code: 1
                   ignore-unfixed: true
