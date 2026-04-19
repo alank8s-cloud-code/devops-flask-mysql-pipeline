@@ -1,0 +1,12 @@
+name: Dependency scan
+
+on: workflow_dispatch
+
+jobs:
+  dependency_check:
+   runs-on: ubuntu-latest
+   steps:
+     - name: code checkout
+       uses: actions/checkout@v5
+
+     - name: install pip audit
