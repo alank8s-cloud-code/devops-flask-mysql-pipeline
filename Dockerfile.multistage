@@ -1,0 +1,55 @@
+# =========================
+# STAGE 1 → builder
+# =========================
+
+FROM python:3.12-slim AS builder
+
+# UPGRADE SYSTEM PACKAGES (Fixes the OpenSSL CVE)
+
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/list/* 
+
+# SET THE WORKING DIRECTORY INSIDE CONTAINER
+
+WORKDIR /app
+
+# COPY THE DEPENDENCIES
+
+COPY requirements.txt .
+
+# INSTALL THE DEPENDENCIES
+
+RUN pip install --no-cache-dir -r requirements.txt  --target=/app/package 
+
+# COPY THE REST OF THE CODE
+
+COPY . .
+
+
+# =========================
+# STAGE 2 → runtime (distroless)
+# =========================
+
+FROM gcr.io/distroless/python3-debian12 AS deployer
+
+# SET THE WORKING DIRECTORY
+
+WORKDIR /app
+
+# COPY THE DEPENDENCIES NO NEED TO INSTALL
+
+COPY --from=builder /app/package /app/package
+
+# COPY THE REST OF THE CODE 
+
+COPY --from=builder /app  /app
+
+# Tell Python where packages are
+
+ENV PYTHONPATH="/app/package"
+
+ENV PYTHONUNBUFFERED=1
+
+# RUN THE APPLICATION
+
+CMD ["-m", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+

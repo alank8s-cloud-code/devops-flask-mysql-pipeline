@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import (
     Flask, render_template, request,
     redirect, url_for, flash, session
@@ -7,25 +10,22 @@ from mysql.connector import Error
 import os
 from flask_bcrypt import Bcrypt
 from functools import wraps
-
+import time
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-this')
 bcrypt = Bcrypt(app)
 
-
 # Database configuration
 DB_CONFIG = {
-    'host': os.environ.get('MYSQL_HOST', 'localhost'),
-    'port': os.environ.get('MYSQL_PORT', '3306'),
-    'user': os.environ.get('MYSQL_USER', 'root'),
-    'password': os.environ.get('MYSQL_PASSWORD', ''),
-    'database': os.environ.get('MYSQL_DB', 'mydb')
+    'host': os.environ.get('MYSQL_HOST'),
+    'port': int(os.environ.get('MYSQL_PORT', '3306')),
+    'user': os.environ.get('MYSQL_USER'),
+    'password': os.environ.get('MYSQL_PASSWORD'),
+    'database': os.environ.get('MYSQL_DATABASE')
 }
 
-
 def get_db_connection():
-    """Create and return database connection"""
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         return connection
@@ -34,92 +34,51 @@ def get_db_connection():
         return None
 
 
+# ✅ FIXED INIT (RETRY + FORCE TABLE CREATE)
 def init_db():
-    """Initialize database and create tables if they don't exist"""
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS todos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    task VARCHAR(255) NOT NULL,
-                    status ENUM('pending', 'completed') DEFAULT 'pending',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            connection.commit()
-            print("Database initialized successfully!")
-        except Error as e:
-            print(f"Error initializing database: {e}")
-        finally:
-            cursor.close()
-            connection.close()
+    for i in range(10):
+        connection = get_db_connection()
 
-# ─────────────────────────────────────────────
-# LOGIN REQUIRED DECORATOR
-# Protects routes — redirects to login if not logged in
-# ─────────────────────────────────────────────
+        if connection:
+            try:
+                cursor = connection.cursor()
 
+                # USERS TABLE
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        username VARCHAR(100) UNIQUE,
+                        email VARCHAR(100) UNIQUE,
+                        password_hash VARCHAR(255)
+                    )
+                """)
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Please log in to access this page.', 'error')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
+                connection.commit()
+                print("✅ USERS table created!")
 
-# ─────────────────────────────────────────────
-# AUTH HELPER
-# Logs every login / logout / failed attempt
-# ─────────────────────────────────────────────
+                cursor.close()
+                connection.close()
+                return
+
+            except Exception as e:
+                print("Retry DB init...", e)
+
+        else:
+            print("⏳ Waiting for MySQL...")
+
+        time.sleep(3)
+
+    print("❌ Failed to initialize DB after retries")
 
 
-def log_auth_action(action, user_id=None, username_attempted=None):
-    """Insert a record into auth_logs"""
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            ip = request.remote_addr
-            cursor.execute(
-                "INSERT INTO auth_logs "
-                "(user_id, action, ip_address, username_attempted) "
-                "VALUES (%s, %s, %s, %s)",
-                (user_id, action, ip, username_attempted)
-            )
-            connection.commit()
-        except Error as e:
-            print(f"Error logging auth action: {e}")
-        finally:
-            cursor.close()
-            connection.close()
-
-# ─────────────────────────────────────────────
-# AUTH ROUTES  (register / login / logout)
-# ─────────────────────────────────────────────
-
+# SIMPLE ROUTES (ONLY REGISTER + LOGIN WORKING)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Register a new user"""
-    if 'user_id' in session:
-        return redirect(url_for('index'))
-
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip()
-        password = request.form.get('password', '')
-
-        if not username or not email or not password:
-            flash('All fields are required!', 'error')
-            return render_template('register.html')
-
-        if len(password) < 6:
-            flash('Password must be at least 6 characters.', 'error')
-            return render_template('register.html')
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
 
         password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -128,266 +87,51 @@ def register():
             try:
                 cursor = connection.cursor()
                 cursor.execute(
-                    "INSERT INTO users (username, email, password_hash) "
-                    "VALUES (%s, %s, %s)",
+                    "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
                     (username, email, password_hash)
                 )
                 connection.commit()
-                flash('Account created! Please log in.', 'success')
-                return redirect(url_for('login'))
-            except Error as e:
-                if 'Duplicate entry' in str(e):
-                    flash('Username or email already exists.', 'error')
-                else:
-                    flash(f'Error creating account: {str(e)}', 'error')
+                return "User Registered Successfully ✅"
+
+            except Exception as e:
+                return f"Error: {e}"
+
             finally:
                 cursor.close()
                 connection.close()
-        else:
-            flash('Database connection failed.', 'error')
 
-    return render_template('register.html')
+    return "Register Page"
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    """Log in an existing user"""
-    if 'user_id' in session:
-        return redirect(url_for('index'))
+    username = request.form.get('username')
+    password = request.form.get('password')
 
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
+    connection = get_db_connection()
+    if connection:
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+            user = cursor.fetchone()
 
-        if not username or not password:
-            flash('Username and password are required!', 'error')
-            return render_template('login.html')
+            if user and bcrypt.check_password_hash(user['password_hash'], password):
+                return "Login Success 🚀"
+            else:
+                return "Invalid Credentials ❌"
 
-        connection = get_db_connection()
-        if connection:
-            try:
-                cursor = connection.cursor(dictionary=True)
-                cursor.execute(
-                    "SELECT * FROM users WHERE username = %s", (username,))
-                user = cursor.fetchone()
+        finally:
+            cursor.close()
+            connection.close()
 
-                if user and bcrypt.check_password_hash(
-                        user['password_hash'], password):
-                    # Successful login
-                    session['user_id'] = user['id']
-                    session['username'] = user['username']
-                    log_auth_action(
-                        'login',
-                        user_id=user['id'],
-                        username_attempted=username)
-                    flash(f"Welcome back, {user['username']}!", 'success')
-                    return redirect(url_for('index'))
-                else:
-                    # Failed login
-                    log_auth_action('failed', username_attempted=username)
-                    flash('Invalid username or password.', 'error')
-            except Error as e:
-                flash(f'Error during login: {str(e)}', 'error')
-            finally:
-                cursor.close()
-                connection.close()
-        else:
-            flash('Database connection failed.', 'error')
-
-    return render_template('login.html')
+    return "DB Error"
 
 
-@app.route('/logout')
-@login_required
-def logout():
-    """Log out the current user"""
-    log_auth_action('logout', user_id=session.get('user_id'),
-                    username_attempted=session.get('username'))
-    session.clear()
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('login'))
-
-
-# ─────────────────────────────────────────────
-# EXISTING ROUTES  (all unchanged — only added
-# @login_required + user_id filtering)
-# ─────────────────────────────────────────────
 @app.route('/')
-@login_required
-def index():
-    """Display all todos for the logged-in user"""
-    connection = get_db_connection()
-    todos = []
-
-    if connection:
-        try:
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(
-                "SELECT * FROM todos WHERE user_id = %s"
-                " AND deleted = FALSE ORDER BY created_at DESC",
-                (session['user_id'],)
-            )
-            todos = cursor.fetchall()
-        except Error as e:
-            flash(f'Error fetching todos: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        flash('Database connection failed', 'error')
-
-    return render_template('index.html', todos=todos)
-
-
-@app.route('/add', methods=['POST'])
-@login_required
-def add_todo():
-    """Add a new todo"""
-    task = request.form.get('task')
-
-    if not task:
-        flash('Task cannot be empty!', 'error')
-        return redirect(url_for('index'))
-
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute(
-                "INSERT INTO todos (task, user_id) VALUES (%s, %s)",
-                (task, session['user_id'])
-            )
-            connection.commit()
-            flash('Todo added successfully!', 'success')
-        except Error as e:
-            flash(f'Error adding todo: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        flash('Database connection failed', 'error')
-
-    return redirect(url_for('index'))
-
-
-@app.route('/complete/<int:todo_id>')
-@login_required
-def complete_todo(todo_id):
-    """Mark a todo as completed"""
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute(
-                "UPDATE todos SET status = 'completed' "
-                "WHERE id = %s AND user_id = %s",
-                (todo_id, session['user_id'])
-            )
-            connection.commit()
-            flash('Todo marked as completed!', 'success')
-        except Error as e:
-            flash(f'Error updating todo: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        flash('Database connection failed', 'error')
-
-    return redirect(url_for('index'))
-
-
-@app.route('/rename/<int:todo_id>', methods=['POST'])
-@login_required
-def rename_todo(todo_id):
-    """Rename an existing todo task"""
-    new_task = request.form.get('new_task', '').strip()
-
-    if not new_task:
-        flash('Task name cannot be empty!', 'error')
-        return redirect(url_for('index'))
-
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute(
-                "UPDATE todos SET task = %s WHERE id = %s AND user_id = %s",
-                (new_task, todo_id, session['user_id'])
-            )
-            connection.commit()
-            flash('Task renamed successfully!', 'success')
-        except Error as e:
-            flash(f'Error renaming todo: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        flash('Database connection failed', 'error')
-
-    return redirect(url_for('index'))
-
-
-@app.route('/delete/<int:todo_id>')
-@login_required
-def delete_todo(todo_id):
-    """Delete a todo"""
-    connection = get_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute(
-                "UPDATE todos SET deleted = TRUE, deleted_at = NOW()"
-                " WHERE id = %s AND user_id = %s",
-                (todo_id, session['user_id'])
-            )
-            connection.commit()
-            flash('Todo deleted successfully!', 'success')
-        except Error as e:
-            flash(f'Error deleting todo: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        flash('Database connection failed', 'error')
-
-    return redirect(url_for('index'))
-
-
-@app.route('/health')
-def health():
-    """Health check endpoint"""
-    connection = get_db_connection()
-    if connection:
-        connection.close()
-        return {'status': 'healthy', 'database': 'connected'}, 200
-    return {'status': 'unhealthy', 'database': 'disconnected'}, 503
-
-
-@app.route('/deleted')
-@login_required
-def view_deleted():
-    """View deleted todos for the logged-in user"""
-    connection = get_db_connection()
-    deleted_todos = []
-
-    if connection:
-        try:
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(
-                "SELECT * FROM todos WHERE deleted = TRUE AND user_id = %s "
-                "ORDER BY deleted_at DESC",
-                (session['user_id'],)
-            )
-            deleted_todos = cursor.fetchall()
-        except Error as e:
-            flash(f'Error fetching deleted todos: {str(e)}', 'error')
-        finally:
-            cursor.close()
-            connection.close()
-
-    return render_template('deleted.html', todos=deleted_todos)
+def home():
+    return "Flask + MySQL Working 🚀"
 
 
 if __name__ == '__main__':
-    init_db()  # Initialize database on startup
+    init_db()
     app.run(port=5000)

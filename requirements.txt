@@ -4,3 +4,4 @@ gunicorn==22.0.0
 Flask-Bcrypt==1.0.1
 Flake8
 bandit
+python-dotenv

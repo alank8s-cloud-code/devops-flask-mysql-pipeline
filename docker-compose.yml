@@ -1,44 +1,42 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-    volumes:
-      - two-tier:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    container_name: mysql_container
+    ports:
+      - "3306:3306"
     networks:
-      - two-tier-app_network-project
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uadmin", "-padmin"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  flask-app:
-    image: ${DOCKER_USER}/flask-image:${DOCKER_TAG}
-    container_name: two-tier-flask-app
+      - todo-net
+    volumes:
+      - todo_db:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    env_file:
+      - .env
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usuraj", "-psuraj**845"]
+      interval: 10s 
+      timeout: 5s
+      retries: 3
+      start_period: 30s 
+ 
+  flask:
+    image: todoapp-flask-mysql-mini:latest
+    container_name: flask-webapp
     ports:
       - "5000:5000"
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-      MYSQL_DB: mydb
+    networks:
+      - todo-net
+    env_file:
+      - .env
     depends_on:
       mysql:
         condition: service_healthy
-    networks:
-      - two-tier-app_network-project
 
 volumes:
-  two-tier:
-
+  todo_db: {}
 networks:
-  two-tier-app_network-project:
+  todo-net:
+    driver: bridge
+
+
+
