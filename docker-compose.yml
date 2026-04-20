@@ -30,7 +30,7 @@ services:
       start_period: 30s
 
   flask:
-    image: todoapp-flask-mysql-mini:latest
+    image: "${DOCKERHUB_USER}/todo-flask-mysql-app:${DOCKER_TAG}"
     container_name: flask-webapp
     ports:
       - "5000:5000"
