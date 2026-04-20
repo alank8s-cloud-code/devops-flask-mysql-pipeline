@@ -25,7 +25,7 @@ jobs:
         secrets: inherit
 
     image_scan:
-        needs: [ build ]
+        needs: [ build_the_image ]
         uses: ./.github/workflows/image_scan.yml
         secrets: inherit
 
