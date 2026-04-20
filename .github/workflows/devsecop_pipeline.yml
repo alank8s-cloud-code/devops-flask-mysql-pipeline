@@ -14,9 +14,23 @@ jobs:
         uses: ./.github/workflows/gitleaks.yml
 
     validate_dockerfile:
+        needs: [ code-quality-scan, scan-dependencies ]
         uses: ./.github/workflows/docker_lint.yml
 
-    image_scan:
-        uses: ./.github/workflows/image_scan.yml
-        d
+    # CI (continuous integration)
+    # Build once the security scans are comlete
+    build:
+        needs: [ validate_dockerfile ]
+        uses: ./.github/workflows/docker_buil_&_push.yml
+        secrets: inherit
 
+    image_scan:
+        needs: [ build ]
+        uses: ./.github/workflows/image_scan.yml
+        secrets: inherit
+
+    # CD (continuous deployment) - deploy to production server if the image scan is successful
+    deploy:
+        needs: [ image_scan ]
+        uses: ./.github/workflows/deploy_to_prod_server.yml
+        secrets: inherit
