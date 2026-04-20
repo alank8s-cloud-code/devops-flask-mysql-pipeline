@@ -6,6 +6,9 @@ on:
 jobs:
   deploy_to_prod_server:
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+      DOCKER_TAG: ${{ github.event.workflow_run.head_sha }}
     steps:
       - name: Code Checkout
         uses: actions/checkout@v5

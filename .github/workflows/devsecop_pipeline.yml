@@ -19,7 +19,7 @@ jobs:
 
     # CI (continuous integration)
     # Build once the security scans are comlete
-    build:
+    build_the_image:
         needs: [ validate_dockerfile ]
         uses: ./.github/workflows/docker_buil_&_push.yml
         secrets: inherit
