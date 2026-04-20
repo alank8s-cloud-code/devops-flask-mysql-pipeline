@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
-      DOCKER_TAG: ${{ github.event.workflow_run.head_sha }}
+      DOCKER_TAG: ${{ github.sha }}
     steps:
       - name: Code Checkout
         uses: actions/checkout@v5
@@ -22,12 +22,12 @@ jobs:
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           scripts: |
             echo " Installing package and create folder"
-            mkdir -p devops
+            mkdir -p ~/devops
             sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
             sudo usermod -aG docker $USER 
 
       - name: Copy the docker compose file
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/scp-action@v0.1.7
         with:
           version: latest
           host: ${{ secrets.PROD_HOST }}
