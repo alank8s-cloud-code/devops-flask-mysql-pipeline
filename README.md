@@ -1,4 +1,4 @@
-# 🚀 Two-Tier Application (Flask + MySQL)
+# 🚀 Two-Tier Application (Flask + MySQL) build
 
 ![Docker](https://img.shields.io/badge/Docker-Automated-2496ED?logo=docker)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions)
