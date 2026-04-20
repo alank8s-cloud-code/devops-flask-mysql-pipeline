@@ -1,3 +1,4 @@
+---
 services:
   mysql:
     image: mysql:8.0
@@ -13,12 +14,21 @@ services:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usuraj", "-psuraj**845"]
-      interval: 10s 
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-usuraj",
+          "-psuraj**845"
+        ]
+      interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 30s 
- 
+      start_period: 30s
+
   flask:
     image: todoapp-flask-mysql-mini:latest
     container_name: flask-webapp
@@ -34,9 +44,7 @@ services:
 
 volumes:
   todo_db: {}
+
 networks:
   todo-net:
     driver: bridge
-
-
-
