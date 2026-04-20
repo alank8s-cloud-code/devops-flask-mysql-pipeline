@@ -21,10 +21,10 @@ jobs:
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           scripts: |
-            echo " Installing package and create foler"
+            echo " Installing package and create folder"
+            mkdir -p devops
             sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
             sudo usermod -aG docker $USER 
-            mkdir -p devops
 
       - name: Copy the docker compose file
         uses: appleboy/ssh-action@v1.0.3
