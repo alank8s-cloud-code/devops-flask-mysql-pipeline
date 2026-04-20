@@ -20,7 +20,7 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          scripts: |
+          script: |
             echo " Installing package and create folder"
             mkdir -p ~/devops
             sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
@@ -43,7 +43,7 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          scripts: |
+          script: |
             echo " Run the application "
             export DOCKERHUB_USER="${{ secrets.DOCKERHUB_USER }}"
             export DOCKER_TAG="${{ github.sha }}"
