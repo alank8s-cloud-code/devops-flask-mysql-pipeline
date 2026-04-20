@@ -9,4 +9,8 @@ jobs:
      - name: code checkout
        uses: actions/checkout@v5
 
-     - name: install pip audit
+     - name: install pip-audit
+       run: pip install pip-audit
+
+     - name: Audit dependecny scan 
+       run: pip-audit -r requirements.txt
