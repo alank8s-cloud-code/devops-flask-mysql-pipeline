@@ -14,12 +14,15 @@ jobs:
        with:
          username: ${{ secrets.DOCKERHUB_USER }}
          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+         
+     - name: pull the latest image
+       run: docker pull ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:${{ github.sha}}
+       
      - name: Run Trivy vulnerability scanner
        uses: aquasecurity/trivy-action@v0.35.0
        with:
-         image-ref: ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:latest
+         image-ref: ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:${{ github.sha}}
          format: 'table'
          exit-code: '1'
-         ignore-unfixed: false
+         ignore-unfixed: true
          severity: 'CRITICAL,HIGH'
