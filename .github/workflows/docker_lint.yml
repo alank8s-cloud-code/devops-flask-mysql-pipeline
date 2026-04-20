@@ -1,7 +1,8 @@
 name: Docker Lint
 
-on: workflow_dispatch
-
+on:
+  workflow_dispatch:
+    
 jobs:
   validate_dockerfile:
    runs-on: ubuntu-latest
