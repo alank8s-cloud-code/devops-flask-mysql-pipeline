@@ -6,59 +6,45 @@ on:
 jobs:
   deploy_to_prod_server:
     runs-on: ubuntu-latest
-
     env:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
       DOCKER_TAG: ${{ github.sha }}
-
     steps:
       - name: Code Checkout
         uses: actions/checkout@v5
 
-      - name: Setup server and install Docker
+      - name: Deploy to prod server && create a folder DevOps
         uses: appleboy/ssh-action@v1.0.3
         with:
+          version: latest
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           script: |
-            echo "Installing Docker and preparing directory"
+            echo " Installing package and create folder"
             mkdir -p ~/devops
+            sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
+            sudo usermod -aG docker $USER 
 
-            sudo apt-get update -y
-            sudo apt-get install -y docker.io docker-compose-v2
-
-            sudo usermod -aG docker $USER
-
-      - name: Copy docker-compose file
+      - name: Copy the docker compose file
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          source: "docker-compose.yml"
-          target: "~/devops"
+          source: docker-compose.yml
+          target: ~/devops
 
-      - name: Run application
+      - name: Run the application on the production server
         uses: appleboy/ssh-action@v1.0.3
         with:
+          version: latest
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           script: |
-            echo "Starting application"
-
+            echo " Run the application "
             export DOCKERHUB_USER="${{ secrets.DOCKERHUB_USER }}"
             export DOCKER_TAG="${{ github.sha }}"
-
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
-              --username "$DOCKERHUB_USER" \
-              --password-stdin
-
-            cd ~/devops
-
-            docker compose down || true
-            docker compose pull
-            docker compose up -d --force-recreate
-
-            docker compose ps
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USER }} --password-stdin  
+            cd ~/devops && docker compose down && docker compose up -d --force-recreate --pull always
