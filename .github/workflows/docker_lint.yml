@@ -19,6 +19,8 @@ jobs:
        run: pip install yamllint
 
       
-     - name: Run yamllint
-       run: yamllint docker-compose.yml
+     - name: Run yamllint and Validate docker-compose
+       run: |
+        yamllint docker-compose.yml
+        docker compose config 
        
