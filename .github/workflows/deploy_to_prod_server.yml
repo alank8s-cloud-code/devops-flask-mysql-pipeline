@@ -22,8 +22,7 @@ jobs:
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           scripts: |
             echo " Installing package and create foler"
-            sudo apt-get update && sudo apt-get upgrade -y 
-            sudo apt-get install docker docker-compose-v2 -y
+            sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
             sudo usermod -aG docker $USER 
             mkdir -p devops
 
