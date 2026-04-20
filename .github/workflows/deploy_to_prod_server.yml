@@ -32,7 +32,7 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          source: ".env,docker-compose.yml"
+          source: "docker-compose.yml"
           target: ~/devops
 
       - name: Run the application on the production server

@@ -1,4 +1,3 @@
----
 services:
   mysql:
     image: mysql:8.0
@@ -10,20 +9,14 @@ services:
     volumes:
       - todo_db:/var/lib/mysql
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-    env_file:
-      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: suraj
+      MYSQL_PASSWORD: suraj**845
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-usuraj",
-          "-psuraj**845"
-        ]
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -usuraj -psuraj**845" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -36,8 +29,13 @@ services:
       - "5000:5000"
     networks:
       - todo-net
-    env_file:
-      - .env
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: suraj
+      MYSQL_PASSWORD: suraj**845
+      MYSQL_DATABASE: mydb
+      SECRET_KEY: suraj-874**99881@123
     depends_on:
       mysql:
         condition: service_healthy
