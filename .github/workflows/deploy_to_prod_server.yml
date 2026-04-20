@@ -1,0 +1,48 @@
+name: Deploy to Production Server
+
+on: workflow_dispatch
+
+jobs:
+  deploy_to_prod_server:
+   runs-on: ubuntu-latest
+   steps:
+     - name: Code Checkout
+       uses: actions/checkout@v5
+
+     - name: Deploy to prod server && create a folder DevOps
+       uses: appleboy/ssh-action@v1.0.3
+       with:
+         version: latest
+         host: ${{ secrets.PROD_HOST }}
+         username: ${{ secrets.PROD_USER }}
+         key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+         scripts: | 
+          echo " Installing package and create foler"
+          sudo apt-get update && sudo apt-get upgrade -y 
+          sudo apt-get install docker docker-compose-v2 -y
+          sudo usermod -aG docker $USER || true
+          mkdir -p devops
+
+     - name: Copy the docker compose file
+       uses: appleboy/ssh-action@v1.0.3
+       with:
+         version: latest
+         host: ${{ secrets.PROD_HOST }}
+         username: ${{ secrets.PROD_USER }}
+         key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+         source: docker-compose.yml
+         target: ~/devops 
+      
+     - name: Run the application on the production server
+       uses: appleboy/ssh-action@v1.0.3
+       with:
+         version: latest
+         host: ${{ secrets.PROD_HOST }}
+         username: ${{ secrets.PROD_USER }}
+         key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+         scripts: | 
+          echo " Run the application "
+          export DOCKERHUB_USER="${{ secrets.DOCKERHUB_USER }}"
+          export DOCKER_TAG="${{ github.sha }}"
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USER }} --password-stdin  
+          cd ~/devops && docker compose down && docker compose up -d --force-recreate --pull always
