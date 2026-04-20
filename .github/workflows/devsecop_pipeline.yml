@@ -1,0 +1,20 @@
+name: DevSecOps end-to-end workflow
+
+on:
+    workflow_dispatch:
+
+jobs:
+    code-quality-scan:
+        uses: ./.github/workflows/code_check.yml
+
+    scan-dependencies:
+        uses: ./.github/workflows/dependencyscan.yml
+
+    scan-gitleaks:
+        uses: ./.github/workflows/gitleaks.yml
+
+    validate_dockerfile:
+        uses: ./.github/workflows/docker_lint.yml
+
+    image_scan:
+        uses: ./.github/workflows/image_scan.yml

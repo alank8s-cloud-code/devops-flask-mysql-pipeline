@@ -1,27 +1,25 @@
 name: Docker Lint
 
 on:
-  workflow_dispatch:
-    
+  workflow_call:
+
 jobs:
   validate_dockerfile:
-   runs-on: ubuntu-latest
-   steps:
-     - name: Code Checkout
-       uses: actions/checkout@v5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v5
 
-     - name: Lint Dockerfile
-       uses: hadolint/hadolint-action@v3.3.0
-       with:
-         dockerfile: Dockerfile
-         
-     - name: install yamllint
-       run: pip install yamllint
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.3.0
+        with:
+          dockerfile: Dockerfile
 
-      
-     - name: Run yamllint and 
-       run:  yamllint docker-compose.yml
-       
-     - name: Validate docker-compose
-       run: docker compose config 
-       
+      - name: install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint and
+        run: yamllint docker-compose.yml
+
+      - name: Validate docker-compose
+        run: docker compose config
