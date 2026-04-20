@@ -16,7 +16,7 @@ jobs:
          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
      - name: Run Trivy vulnerability scanner
-       uses: aquasecurity/trivy-action@0.35.0
+       uses: aquasecurity/trivy-action@v0.35.0
        with:
          image-ref: ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:latest
          format: 'table'
