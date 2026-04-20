@@ -27,4 +27,4 @@ INSERT INTO todos (task, status) VALUES
     ('Deploy to production', 'pending');
 
 ---
-.env
+
