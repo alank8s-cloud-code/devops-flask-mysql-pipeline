@@ -24,6 +24,7 @@ jobs:
          context: .
          file: Dockerfile.multistage
          push: true
+         no-cache: true
          tags: |
           ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:latest
           ${{ secrets.DOCKERHUB_USER }}/todo-flask-mysql-app:${{ github.sha }}
