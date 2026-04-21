@@ -24,32 +24,37 @@ RUN pip install --no-cache-dir -r requirements.txt  --target=/app/package
 
 COPY . .
 
+EXPOSE 5000
 
-# =========================
-# STAGE 2 → runtime (distroless)
-# =========================
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
 
-FROM gcr.io/distroless/python3-debian12 AS deployer
+# # =========================
+# # STAGE 2 → runtime (distroless)
+# # =========================
 
-# SET THE WORKING DIRECTORY
+# FROM gcr.io/distroless/python3-debian12 AS deployer
 
-WORKDIR /app
+# # SET THE WORKING DIRECTORY
 
-# COPY THE DEPENDENCIES NO NEED TO INSTALL
+# WORKDIR /app
 
-COPY --from=builder /app/package /app/package
+# # COPY THE DEPENDENCIES NO NEED TO INSTALL
 
-# COPY THE REST OF THE CODE 
+# COPY --from=builder /app/package /app/package
 
-COPY --from=builder /app  /app
+# # COPY THE REST OF THE CODE 
 
-# Tell Python where packages are
+# COPY --from=builder /app  /app
 
-ENV PYTHONPATH="/app/package"
 
-ENV PYTHONUNBUFFERED=1
+# # Tell Python where packages are
 
-# RUN THE APPLICATION
+# ENV PYTHONPATH="/app/package"
 
-CMD ["-m", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# ENV PYTHONUNBUFFERED=1
 
+# EXPOSE 5000
+# # RUN THE APPLICATION
+
+# #CMD ["-m", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# CMD ["python", "-m", "gunicorn", "--workers", "3", "--bind", "0.0.0.0:5000", "app:app"]
