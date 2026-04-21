@@ -13,8 +13,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mydb
-      MYSQL_USER: suraj
-      MYSQL_PASSWORD: "suraj**845"
     restart: unless-stopped
     healthcheck:
       test:
@@ -43,7 +41,6 @@ services:
       MYSQL_USER: suraj
       MYSQL_PASSWORD: "suraj**845"
       MYSQL_DATABASE: mydb
-      SECRET_KEY: "suraj-874**99881@123"
     depends_on:
       mysql:
         condition: service_healthy
