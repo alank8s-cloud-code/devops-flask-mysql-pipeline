@@ -22,7 +22,7 @@ bcrypt = Bcrypt(app)
 DB_CONFIG = {
     "host": os.environ.get("MYSQL_HOST", "localhost"),
     "port": int(os.environ.get("MYSQL_PORT", "3306")),
-    "user": os.environ.get("MYSQL_USER", "root"),
+    "user": os.environ.get("MYSQL_USER", "suraj"),
     "password": os.environ.get("MYSQL_PASSWORD", ""),
     "database": os.environ.get("MYSQL_DATABASE", "mydb"),
 }
